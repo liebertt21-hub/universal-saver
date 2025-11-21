@@ -1,7 +1,7 @@
 {
   "name": "universal-saver",
   "version": "1.0.0",
-  "description": "Downloader TikTok YouTube FB IG",
+  "description": "Downloader",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

@@ -7,9 +7,9 @@ const helmet = require('helmet'); // Library Keamanan Header
 
 const app = express();
 
-// === SATU-SATUNYA PERUBAHAN (Agar jalan di Render) ===
-const PORT = process.env.PORT || 3000; 
-// =====================================================
+// === PERBAIKAN UTAMA (Agar Jalan di Render) ===
+const PORT = process.env.PORT || 3000;
+// ==============================================
 
 // ==========================================
 //  SETTING KEAMANAN & PASSWORD
@@ -17,26 +17,25 @@ const PORT = process.env.PORT || 3000;
 const ADMIN_USER = "saya";       
 const ADMIN_PASS = "rahasia123"; 
 
-// 1. HELMET: Mengamankan Header HTTP (Biar hacker bingung server pake apa)
+// 1. HELMET: Mengamankan Header HTTP
 app.use(helmet({
-    contentSecurityPolicy: false, // Dimatikan agar gambar dari luar (FB/IG) tetap muncul
+    contentSecurityPolicy: false, 
     crossOriginEmbedderPolicy: false
 }));
 
 // 2. RATE LIMITER: Mencegah DDoS / Spam Klik
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // Dalam waktu 15 menit...
-    max: 100, // ...Maksimal cuma boleh 100 request per IP
+    windowMs: 15 * 60 * 1000, // 15 menit
+    max: 100, // Maksimal 100 request per IP
     message: {
         error: "⛔ Santai dulu bang! Kamu terlalu sering request. Coba lagi nanti."
     },
     standardHeaders: true,
     legacyHeaders: false,
 });
-// Terapkan limiter ke semua request
 app.use(limiter);
 
-// 3. TRUST PROXY: Penting kalau nanti pake Hosting/Cloudflare agar IP terbaca benar
+// 3. TRUST PROXY: Wajib untuk Render/Cloudflare agar IP terbaca
 app.set('trust proxy', 1);
 
 // Middleware Login Admin
@@ -113,7 +112,7 @@ const FALLBACK_IMAGES = {
 function findBestImage(obj, platform) {
     const isValid = (s) => typeof s === 'string' && s.length > 10 && (s.startsWith('http') || s.startsWith('//'));
 
-    // Cek Struktur Array (Paling sering di API Ryzen/Widipe)
+    // Cek Struktur Array
     if (Array.isArray(obj.result) && obj.result[0]) {
         if (isValid(obj.result[0].thumbnail)) return obj.result[0].thumbnail;
         if (isValid(obj.result[0].thumb)) return obj.result[0].thumb;
@@ -299,5 +298,5 @@ app.get('/api/download', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Server AMAN SIAP di http://localhost:${PORT}`);
+    console.log(`Server AMAN SIAP di PORT ${PORT}`);
 });
