@@ -8,9 +8,6 @@ const helmet = require('helmet');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ==========================================
-//  SETTING
-// ==========================================
 const ADMIN_USER = "saya";       
 const ADMIN_PASS = "rahasia123"; 
 
@@ -60,66 +57,64 @@ app.get('/api/stats', (req, res) => {
 });
 
 // ==========================================
-// MESIN BARU: COBALT ENGINE (Paling Kuat)
+// MESIN DOWNLOADER: MULTI-INSTANCE COBALT
 // ==========================================
-async function tryCobalt(url) {
-    try {
-        console.log(`[COBALT] Mencoba download: ${url}`);
-        const response = await axios.post('https://co.wuk.sh/api/json', {
-            url: url,
-            vQuality: '720',
-            filenamePattern: 'basic',
-            isAudioOnly: false
-        }, {
-            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-            timeout: 20000 // Kasih waktu lebih lama (20 detik)
-        });
+const COBALT_INSTANCES = [
+    'https://api.cobalt.tools',          // Instance 1 (Cadangan)
+    'https://cobalt.api.kmn.my.id',      // Instance 2 (Community)
+    'https://cobalt.kwiatekmiki.com',    // Instance 3 (Community)
+    'https://co.wuk.sh'                  // Instance 4 (Official - Sering limit)
+];
 
-        if (response.data && response.data.url) {
-            return { url: response.data.url };
+async function tryCobalt(url) {
+    // Loop semua server yang ada
+    for (let instance of COBALT_INSTANCES) {
+        try {
+            console.log(`[COBALT] Mencoba server: ${instance} untuk ${url}`);
+            const response = await axios.post(`${instance}/api/json`, {
+                url: url,
+                vQuality: '720',
+                filenamePattern: 'basic',
+                isAudioOnly: false
+            }, {
+                headers: { 
+                    'Accept': 'application/json', 
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                },
+                timeout: 15000 
+            });
+
+            // Cek hasil
+            if (response.data) {
+                if (response.data.url) return { url: response.data.url };
+                if (response.data.picker && response.data.picker[0]) return { url: response.data.picker[0].url };
+            }
+        } catch (e) {
+            console.log(`❌ Gagal di ${instance}: ${e.message}`);
+            // Lanjut ke server berikutnya di list...
         }
-        if (response.data && response.data.picker) {
-            return { url: response.data.picker[0].url };
-        }
-    } catch (e) {
-        console.log(`[COBALT] Gagal: ${e.message}`);
     }
-    return null;
+    return null; // Semua server nyerah
 }
 
-// ==========================================
-// CADANGAN (Backup jika Cobalt sibuk)
-// ==========================================
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
 async function downloadBackup(url, platform) {
     let apis = [];
-    
-    // HAPUS API YANG MATI/BLOKIR, SISAKAN YANG KUAT
     if (platform === 'tiktok') apis.push(`https://www.tikwm.com/api/?url=${url}`);
-    else if (platform === 'youtube') apis.push(`https://api.ryzendesu.vip/api/downloader/ytmp4?url=${url}`); // YT Ryzen biasanya masih oke
-    else if (platform === 'facebook' || platform === 'instagram') {
-        // Kita coba SnapSave lagi tapi dengan header berbeda nanti
-        apis.push(`https://api.ryzendesu.vip/api/downloader/snapsave?url=${url}`);
-        apis.push(`https://api.ryzendesu.vip/api/downloader/fbdl?url=${url}`);
-    }
-
+    else if (platform === 'youtube') apis.push(`https://api.ryzendesu.vip/api/downloader/ytmp4?url=${url}`);
+    
     for (let apiUrl of apis) {
         try {
-            console.log(`[BACKUP] Hit: ${apiUrl}`);
             const res = await axios.get(apiUrl, { headers: { 'User-Agent': USER_AGENT }, timeout: 10000 });
             const d = res.data;
-            
             let videoUrl = null;
             let cover = null;
-
-            if (d.data && d.data.play) { videoUrl = d.data.play; cover = d.data.cover; } // TikWM
-            else if (d.result && d.result.hd) { videoUrl = d.result.hd; cover = d.result.thumbnail; } // Ryzen
+            if (d.data && d.data.play) { videoUrl = d.data.play; cover = d.data.cover; }
             else if (d.result && d.result.url) { videoUrl = d.result.url; cover = d.result.thumbnail; }
-            else if (d.url) videoUrl = d.url;
-
             if (videoUrl) return { url: videoUrl, cover: cover || "https://cdn-icons-png.flaticon.com/512/564/564619.png" };
-        } catch (e) { console.log(`[BACKUP] Gagal: ${e.message}`); }
+        } catch (e) {}
     }
     return null;
 }
@@ -135,40 +130,30 @@ app.get('/api/download', async (req, res) => {
     else if (url.includes('instagram')) platform = 'instagram';
     else if (url.includes('fb') || url.includes('facebook')) platform = 'facebook';
 
-    // 1. COBA COBALT DULU (JALUR UTAMA)
+    // UTAMAKAN COBALT (MULTI-SERVER) UNTUK FB/IG
     let result = await tryCobalt(url);
-    let finalResult = null;
-
-    if (result) {
-        console.log("✅ SUKSES via Cobalt!");
-        finalResult = {
-            success: true, platform: platform, title: "Video Downloaded",
-            cover: "https://cdn-icons-png.flaticon.com/512/564/564619.png",
-            video_hd: result.url, video_sd: result.url, music_url: null, images: []
-        };
-    } else {
-        // 2. KALAU GAGAL, BARU PAKE CADANGAN
-        console.log("⚠️ Cobalt gagal, mencoba backup...");
-        let backup = await downloadBackup(url, platform);
-        if (backup) {
-            console.log("✅ SUKSES via Backup!");
-            finalResult = {
-                success: true, platform: platform, title: "Video Downloaded (Backup)",
-                cover: backup.cover, video_hd: backup.url, video_sd: backup.url,
-                music_url: null, images: []
-            };
-        }
+    
+    if (!result && (platform === 'tiktok' || platform === 'youtube')) {
+        result = await downloadBackup(url, platform);
     }
 
-    if (finalResult) {
+    if (result) {
         updateStats(platform, ip);
-        res.json(finalResult);
+        res.json({
+            success: true,
+            platform: platform,
+            title: "Video Downloaded",
+            cover: result.cover || "https://cdn-icons-png.flaticon.com/512/564/564619.png",
+            video_hd: result.url,
+            video_sd: result.url,
+            music_url: null,
+            images: []
+        });
     } else {
-        // Pesan error jujur
-        res.status(500).json({ error: 'Gagal. Server Render diblokir oleh Facebook/IG.' });
+        res.status(500).json({ error: 'Gagal. Server Render diblokir semua provider.' });
     }
 });
 
 app.listen(PORT, () => {
-    console.log(`Server COBALT Ready di Port ${PORT}`);
+    console.log(`Server MULTI-COBALT Ready di Port ${PORT}`);
 });
