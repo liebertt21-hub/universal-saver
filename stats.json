@@ -1,0 +1,174 @@
+{
+  "total_requests": 32,
+  "unique_visitors": [
+    "::1"
+  ],
+  "recent_logs": [
+    {
+      "time": "21/11/2025, 19.31.36",
+      "ip": "::1",
+      "platform": "facebook"
+    },
+    {
+      "time": "21/11/2025, 19.04.19",
+      "ip": "::1",
+      "platform": "facebook"
+    },
+    {
+      "time": "21/11/2025, 18.07.20",
+      "ip": "::1",
+      "platform": "instagram"
+    },
+    {
+      "time": "21/11/2025, 17.57.59",
+      "ip": "::1",
+      "platform": "instagram"
+    },
+    {
+      "time": "21/11/2025, 17.57.21",
+      "ip": "::1",
+      "platform": "instagram"
+    },
+    {
+      "time": "21/11/2025, 17.57.03",
+      "ip": "::1",
+      "platform": "facebook"
+    },
+    {
+      "time": "21/11/2025, 17.51.19",
+      "ip": "::1",
+      "platform": "facebook"
+    },
+    {
+      "time": "21/11/2025, 17.37.14",
+      "ip": "::1",
+      "platform": "instagram"
+    },
+    {
+      "time": "21/11/2025, 17.33.37",
+      "ip": "::1",
+      "platform": "instagram"
+    },
+    {
+      "time": "21/11/2025, 17.33.13",
+      "ip": "::1",
+      "platform": "facebook"
+    },
+    {
+      "time": "21/11/2025, 17.30.05",
+      "ip": "::1",
+      "platform": "facebook"
+    },
+    {
+      "time": "21/11/2025, 17.29.59",
+      "ip": "::1",
+      "platform": "facebook"
+    },
+    {
+      "time": "21/11/2025, 17.27.40",
+      "ip": "::1",
+      "platform": "facebook"
+    },
+    {
+      "time": "21/11/2025, 17.27.12",
+      "ip": "::1",
+      "platform": "youtube"
+    },
+    {
+      "time": "21/11/2025, 17.26.23",
+      "ip": "::1",
+      "platform": "tiktok"
+    },
+    {
+      "time": "21/11/2025, 17.25.48",
+      "ip": "::1",
+      "platform": "facebook"
+    },
+    {
+      "time": "21/11/2025, 17.25.32",
+      "ip": "::1",
+      "platform": "instagram"
+    },
+    {
+      "time": "21/11/2025, 17.22.05",
+      "ip": "::1",
+      "platform": "instagram"
+    },
+    {
+      "time": "21/11/2025, 17.21.35",
+      "ip": "::1",
+      "platform": "facebook"
+    },
+    {
+      "time": "21/11/2025, 17.14.17",
+      "ip": "::1",
+      "platform": "tiktok"
+    },
+    {
+      "time": "21/11/2025, 17.12.48",
+      "ip": "::1",
+      "platform": "youtube"
+    },
+    {
+      "time": "21/11/2025, 16.08.26",
+      "ip": "::1",
+      "platform": "instagram"
+    },
+    {
+      "time": "21/11/2025, 16.01.08",
+      "ip": "::1",
+      "platform": "tiktok"
+    },
+    {
+      "time": "21/11/2025, 15.59.33",
+      "ip": "::1",
+      "platform": "tiktok"
+    },
+    {
+      "time": "21/11/2025, 15.53.08",
+      "ip": "::1",
+      "platform": "instagram"
+    },
+    {
+      "time": "21/11/2025, 15.49.56",
+      "ip": "::1",
+      "platform": "youtube"
+    },
+    {
+      "time": "21/11/2025, 15.49.08",
+      "ip": "::1",
+      "platform": "instagram"
+    },
+    {
+      "time": "21/11/2025, 15.43.05",
+      "ip": "::1",
+      "platform": "tiktok"
+    },
+    {
+      "time": "21/11/2025, 15.42.23",
+      "ip": "::1",
+      "platform": "tiktok"
+    },
+    {
+      "time": "21/11/2025, 15.41.30",
+      "ip": "::1",
+      "platform": "youtube"
+    },
+    {
+      "time": "21/11/2025, 15.40.04",
+      "ip": "::1",
+      "platform": "instagram"
+    },
+    {
+      "time": "21/11/2025, 15.35.37",
+      "ip": "::1",
+      "platform": "instagram"
+    }
+  ],
+  "platforms": {
+    "tiktok": 6,
+    "youtube": 4,
+    "instagram": 12,
+    "facebook": 10
+  }
+}

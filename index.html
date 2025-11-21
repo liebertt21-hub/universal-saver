@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="referrer" content="no-referrer">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Downloader</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center font-sans p-4">
+
+    <div class="w-full max-w-md p-6 bg-gray-800 rounded-2xl shadow-2xl border border-gray-700">
+        
+        <h1 class="text-3xl font-bold text-center mb-6 bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-blue-500">
+            Universal Saver
+        </h1>
+        
+        <div class="flex justify-center space-x-5 text-xl text-gray-400 mb-4">
+            <i class="fab fa-tiktok"></i> <i class="fab fa-youtube"></i> <i class="fab fa-instagram"></i> <i class="fab fa-facebook"></i>
+        </div>
+
+        <div class="w-full mb-6 p-2 bg-gray-750 rounded-lg border-2 border-dashed border-gray-600 text-center flex flex-col justify-center items-center min-h-[60px]">
+            <span class="text-xs text-gray-500 font-mono mb-1">[TEMPAT IKLAN BANNER ATAS]</span>
+            <span class="text-[10px] text-gray-600">Tempel kode script iklan (Adsterra/Monetag) di sini nanti</span>
+            
+            </div>
+        <div class="flex gap-2 mb-6">
+            <input type="text" id="inputUrl" placeholder="Paste link di sini..." 
+                class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:border-green-500 text-white text-sm">
+            <button onclick="downloadContent()" id="btnDownload"
+                class="bg-green-600 hover:bg-green-700 px-5 rounded-lg font-bold text-white shadow-lg transition">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+
+        <div id="loading" class="hidden text-center py-6">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-green-500 mx-auto mb-3"></div>
+            <p class="text-xs text-gray-400">Sedang mencari file...</p>
+        </div>
+
+        <div id="result" class="hidden bg-gray-750 mt-2 border-t border-gray-700 pt-4">
+            
+            <div class="flex gap-4 mb-4 items-center bg-gray-700 p-3 rounded-lg">
+                <img id="thumb" src="" onerror="this.src='https://cdn-icons-png.flaticon.com/512/564/564619.png'"
+                     class="w-16 h-16 object-contain rounded bg-gray-800 border border-gray-600">
+                <div class="flex-1 overflow-hidden">
+                    <h3 id="title" class="text-sm font-bold line-clamp-2 mb-1 text-white">Judul Video</h3>
+                    <span id="platformBadge" class="text-[10px] bg-black px-2 py-1 rounded text-white font-bold uppercase">PLATFORM</span>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                
+                <div id="videoButtons" class="hidden flex flex-col gap-2">
+                    <a id="dlVideoHD" href="#" target="_blank" class="w-full bg-blue-700 hover:bg-blue-800 py-3 rounded-lg text-center font-bold text-sm text-white shadow-lg flex items-center justify-center border border-blue-500">
+                        <i class="fas fa-video mr-2"></i> Download Video
+                    </a>
+                    
+                    <a id="dlVideoSD" href="#" target="_blank" class="hidden w-full bg-blue-500 hover:bg-blue-600 py-2 rounded-lg text-center font-bold text-xs text-white shadow flex items-center justify-center">
+                        <i class="fas fa-compress mr-2"></i> Download Versi SD
+                    </a>
+                </div>
+
+                <a id="dlMusic" href="#" target="_blank" class="hidden w-full bg-pink-600 hover:bg-pink-700 py-3 rounded-lg text-center font-bold text-sm text-white shadow-lg flex items-center justify-center">
+                    <i class="fas fa-music mr-2"></i> Download Audio (MP3)
+                </a>
+                
+                <div id="noMusicMsg" class="hidden text-center p-2 bg-gray-700/50 rounded text-xs text-yellow-500 border border-yellow-600/30">
+                    <i class="fas fa-info-circle mr-1"></i> Audio terpisah tidak tersedia.
+                </div>
+
+                <div id="photoContainer" class="hidden mt-4">
+                    <div id="photoArea" class="grid grid-cols-2 gap-3"></div>
+                </div>
+
+                <div class="mt-6 w-full p-4 bg-gray-800 rounded-lg border-2 border-dashed border-gray-600 text-center flex flex-col justify-center items-center min-h-[250px]">
+                    <span class="text-xs text-gray-500 font-mono mb-1">[TEMPAT IKLAN KOTAK BAWAH]</span>
+                    <span class="text-[10px] text-gray-600">Tempel kode script iklan (Native Banner) di sini nanti</span>
+                    <br>
+                    <i class="fas fa-ad text-4xl text-gray-700"></i>
+                </div>
+                </div>
+        </div>
+    </div>
+
+    <script>
+        async function downloadContent() {
+            const url = document.getElementById('inputUrl').value;
+            const btn = document.getElementById('btnDownload');
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            const thumb = document.getElementById('thumb');
+            
+            // Elements
+            const videoBtns = document.getElementById('videoButtons');
+            const btnHD = document.getElementById('dlVideoHD');
+            const btnSD = document.getElementById('dlVideoSD');
+            const btnMusic = document.getElementById('dlMusic');
+            const msgNoMusic = document.getElementById('noMusicMsg');
+            const photoCont = document.getElementById('photoContainer');
+            const photoArea = document.getElementById('photoArea');
+
+            if (!url) return alert("Link kosong!");
+
+            // Reset UI
+            loading.classList.remove('hidden');
+            result.classList.add('hidden');
+            videoBtns.classList.add('hidden');
+            btnSD.classList.add('hidden');
+            btnMusic.classList.add('hidden');
+            msgNoMusic.classList.add('hidden');
+            photoCont.classList.add('hidden');
+            photoArea.innerHTML = '';
+            thumb.src = ''; 
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`/api/download?url=${encodeURIComponent(url)}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    thumb.src = data.cover;
+                    document.getElementById('title').innerText = data.title || "Konten Media";
+                    document.getElementById('platformBadge').innerText = data.platform;
+
+                    const bestLink = data.video_hd || data.video_sd || data.video_url;
+                    const lowLink = data.video_sd;
+
+                    if (bestLink) {
+                        videoBtns.classList.remove('hidden');
+                        btnHD.href = bestLink;
+                        btnHD.innerHTML = '<i class="fas fa-video mr-2"></i> Download Video' + (data.video_hd ? ' (HD)' : '');
+
+                        if (lowLink && lowLink !== bestLink) {
+                            btnSD.href = lowLink;
+                            btnSD.classList.remove('hidden');
+                        }
+                    }
+
+                    if (data.music_url) {
+                        btnMusic.href = data.music_url;
+                        btnMusic.classList.remove('hidden');
+                    } else if (['instagram', 'facebook'].includes(data.platform)) {
+                        msgNoMusic.classList.remove('hidden');
+                    }
+
+                    if (data.images && data.images.length > 0) {
+                        photoCont.classList.remove('hidden');
+                        data.images.forEach((img, i) => {
+                            photoArea.innerHTML += `
+                                <div class="relative group overflow-hidden rounded border border-gray-600">
+                                    <img src="${img}" class="w-full h-32 object-cover">
+                                    <a href="${img}" target="_blank" download class="absolute bottom-0 inset-x-0 bg-green-600 text-white text-xs font-bold py-2 text-center opacity-90 hover:opacity-100">Simpan #${i+1}</a>
+                                </div>`;
+                        });
+                    }
+                    result.classList.remove('hidden');
+                } else {
+                    alert("Gagal: " + (data.error || "Konten tidak ditemukan"));
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Server Error. Cek terminal VS Code.");
+            } finally {
+                loading.classList.add('hidden');
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

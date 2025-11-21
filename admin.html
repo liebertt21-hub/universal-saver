@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body class="bg-gray-900 text-white min-h-screen font-sans p-6">
+
+    <div class="max-w-5xl mx-auto">
+        
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-white">🕵️ Dashboard Admin</h1>
+                <p class="text-gray-400 text-sm" id="statusText">Menghubungkan ke server...</p>
+            </div>
+            <button onclick="loadStats()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg font-bold transition">
+                <i class="fas fa-sync-alt mr-2"></i> Refresh Data
+            </button>
+        </div>
+
+        <div id="errorBox" class="hidden bg-red-600 text-white p-4 rounded-lg mb-6 shadow-lg animate-pulse">
+            <i class="fas fa-exclamation-triangle mr-2"></i> 
+            <span id="errorMessage">Gagal koneksi. Pastikan server menyala!</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg border-l-4 border-green-500">
+                <p class="text-gray-400 text-xs uppercase font-bold">Total Klik Download</p>
+                <h2 class="text-4xl font-bold text-white mt-1" id="totalDl">...</h2>
+            </div>
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg border-l-4 border-purple-500">
+                <p class="text-gray-400 text-xs uppercase font-bold">Pengunjung Unik</p>
+                <h2 class="text-4xl font-bold text-white mt-1" id="uniqueUser">...</h2>
+                <p class="text-[10px] text-gray-500">Berdasarkan IP</p>
+            </div>
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg border-l-4 border-yellow-500">
+                <p class="text-gray-400 text-xs uppercase font-bold">Platform Terlaris</p>
+                <h2 class="text-xl font-bold text-white mt-2" id="topPlatform">...</h2>
+            </div>
+        </div>
+
+        <div class="bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+            <div class="p-4 border-b border-gray-700 bg-gray-750">
+                <h3 class="font-bold text-lg"><i class="fas fa-list-ul mr-2"></i> Log Aktivitas</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-gray-400">
+                    <thead class="bg-gray-700 text-gray-200 uppercase text-xs">
+                        <tr>
+                            <th class="px-6 py-3">Waktu</th>
+                            <th class="px-6 py-3">IP Address</th>
+                            <th class="px-6 py-3">Platform</th>
+                            <th class="px-6 py-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logTableBody" class="divide-y divide-gray-700">
+                        <tr><td colspan="4" class="px-6 py-4 text-center">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadStats() {
+            const statusText = document.getElementById('statusText');
+            const errorBox = document.getElementById('errorBox');
+            
+            statusText.innerText = "Sedang mengambil data...";
+            errorBox.classList.add('hidden');
+
+            try {
+                // MENGGUNAKAN ALAMAT ABSOLUT UNTUK MENGHINDARI MASALAH FILE://
+                const response = await fetch('http://localhost:3000/api/stats');
+
+                if (!response.ok) {
+                    throw new Error(`Server Error: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                // 1. Isi Kartu
+                document.getElementById('totalDl').innerText = data.total_requests || 0;
+                document.getElementById('uniqueUser').innerText = (data.unique_visitors || []).length;
+
+                // Cari Platform Terlaris
+                let max = 0;
+                let topPlat = "-";
+                if (data.platforms) {
+                    for (const [key, val] of Object.entries(data.platforms)) {
+                        if (val > max) { max = val; topPlat = key; }
+                    }
+                }
+                document.getElementById('topPlatform').innerText = topPlat.toUpperCase();
+
+                // 2. Isi Tabel Log
+                const tbody = document.getElementById('logTableBody');
+                tbody.innerHTML = ''; 
+
+                if (data.recent_logs && data.recent_logs.length > 0) {
+                    data.recent_logs.forEach(log => {
+                        let badgeColor = 'bg-gray-600';
+                        if (log.platform === 'tiktok') badgeColor = 'bg-pink-600';
+                        if (log.platform === 'youtube') badgeColor = 'bg-red-600';
+                        if (log.platform === 'instagram') badgeColor = 'bg-fuchsia-600';
+                        if (log.platform === 'facebook') badgeColor = 'bg-blue-600';
+
+                        const row = `
+                            <tr class="hover:bg-gray-700 transition">
+                                <td class="px-6 py-4 text-white">${log.time}</td>
+                                <td class="px-6 py-4 font-mono text-yellow-400 font-bold tracking-wide">
+                                    ${log.ip === '::1' ? 'Localhost' : log.ip}
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="${badgeColor} text-white px-2 py-1 rounded text-xs font-bold uppercase">
+                                        ${log.platform}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-green-400 font-bold">
+                                    <i class="fas fa-check-circle mr-1"></i> Sukses
+                                </td>
+                            </tr>
+                        `;
+                        tbody.innerHTML += row;
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center py-8">Belum ada aktivitas download.</td></tr>';
+                }
+                statusText.innerText = "Data terupdate: " + new Date().toLocaleTimeString();
+
+            } catch (e) {
+                console.error(e);
+                statusText.innerText = "Terputus.";
+                document.getElementById('errorMessage').innerText = "GAGAL: " + e.message + ". (Cek Terminal VS Code)";
+                errorBox.classList.remove('hidden');
+            }
+        }
+
+        // Load otomatis saat dibuka
+        loadStats();
+    </script>
+</body>
+</html>
