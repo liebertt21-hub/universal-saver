@@ -7,9 +7,9 @@ const helmet = require('helmet'); // Library Keamanan Header
 
 const app = express();
 
-// === PERBAIKAN UTAMA (Agar Jalan di Render) ===
-const PORT = process.env.PORT || 3000;
-// ==============================================
+// === BAGIAN INI PENTING AGAR JALAN DI RENDER ===
+const PORT = process.env.PORT || 3000; 
+// ===============================================
 
 // ==========================================
 //  SETTING KEAMANAN & PASSWORD
@@ -99,7 +99,7 @@ app.get('/api/stats', (req, res) => {
 });
 
 // ==========================================
-// 2. HELPER FUNCTIONS
+// 2. HELPER FUNCTIONS (FIX GAMBAR)
 // ==========================================
 const FALLBACK_IMAGES = {
     tiktok: "https://cdn-icons-png.flaticon.com/512/3046/3046121.png",
@@ -145,6 +145,7 @@ function findBestImage(obj, platform) {
     if (isValid(obj.cover)) return obj.cover;
     if (isValid(obj.image)) return obj.image;
     if (isValid(obj.picture)) return obj.picture;
+    if (isValid(obj.preview)) return obj.preview;
     
     if (obj.video) {
         if (isValid(obj.video.thumb)) return obj.video.thumb;
